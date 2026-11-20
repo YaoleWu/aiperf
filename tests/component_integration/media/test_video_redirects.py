@@ -438,5 +438,10 @@ async def test_video_workflow_timing_and_published_responses(
             "/final",
         ]
         assert record.end_perf_ns >= download_end_ns
+        assert record.responses[-1].perf_ns <= download_end_ns
+        assert (
+            download_end_ns <= record.video_download_end_perf_ns <= record.end_perf_ns
+        )
     else:
         assert seen == ["/v1/videos", "/v1/videos/job"]
+        assert record.video_download_end_perf_ns is None

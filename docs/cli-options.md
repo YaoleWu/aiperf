@@ -641,7 +641,7 @@ Transport connection reuse strategy. 'pooled' (default): connections are pooled 
 
 #### `--download-video-content`
 
-For video generation endpoints, download the video content after generation completes. When enabled, request latency includes the video download time. When disabled (default), only generation time is measured.
+For video generation endpoints, download the video content after generation completes. When enabled, video_job_e2e_latency includes the download time and video_content_download_latency reports the additional download phase. Request latency retains its last-response semantics.
 <br/>_Flag (no value required)_
 
 #### `--request-content-type` `<str>`
@@ -2322,7 +2322,7 @@ Transport connection reuse strategy. 'pooled' (default): connections are pooled 
 
 #### `--download-video-content`
 
-For video generation endpoints, download the video content after generation completes. When enabled, request latency includes the video download time. When disabled (default), only generation time is measured.
+For video generation endpoints, download the video content after generation completes. When enabled, video_job_e2e_latency includes the download time and video_content_download_latency reports the additional download phase. Request latency retains its last-response semantics.
 <br/>_Flag (no value required)_
 
 #### `--request-content-type` `<str>`
@@ -3998,7 +3998,7 @@ Transport connection reuse strategy. 'pooled' (default): connections are pooled 
 
 #### `--download-video-content`
 
-For video generation endpoints, download the video content after generation completes. When enabled, request latency includes the video download time. When disabled (default), only generation time is measured.
+For video generation endpoints, download the video content after generation completes. When enabled, video_job_e2e_latency includes the download time and video_content_download_latency reports the additional download phase. Request latency retains its last-response semantics.
 <br/>_Flag (no value required)_
 
 #### `--request-content-type` `<str>`
@@ -6181,7 +6181,7 @@ Transport connection reuse strategy. 'pooled' (default): connections are pooled 
 
 #### `--download-video-content`
 
-For video generation endpoints, download the video content after generation completes. When enabled, request latency includes the video download time. When disabled (default), only generation time is measured.
+For video generation endpoints, download the video content after generation completes. When enabled, video_job_e2e_latency includes the download time and video_content_download_latency reports the additional download phase. Request latency retains its last-response semantics.
 <br/>_Flag (no value required)_
 
 #### `--request-content-type` `<str>`

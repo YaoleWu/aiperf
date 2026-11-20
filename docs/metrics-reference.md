@@ -43,6 +43,7 @@ This document provides a comprehensive reference of all metrics available in AIP
     - [Image Throughput](#image-throughput)
     - [Image Latency](#image-latency)
   - [Video Metrics](#video-metrics)
+    - [Video Job Lifecycle](#video-job-lifecycle)
     - [Video Inference Time](#video-inference-time)
     - [Video Peak Memory](#video-peak-memory)
   - [Audio Metrics](#audio-metrics)
@@ -730,7 +731,28 @@ image_latency = request_latency_ms / num_images
 ## Video Metrics
 
 > [!NOTE]
-> All metrics in this section require video-producing endpoints (e.g., SGLang video generation). These metrics rely on server-reported fields in the response and are not available for non-video endpoints.
+> All metrics in this section require video-producing endpoints (e.g., SGLang video generation) and are not available for non-video endpoints. Lifecycle metrics use client-observed timing; inference time and peak memory require server-reported fields.
+
+### Video Job Lifecycle
+
+**Type:** [Record Metric](#record-metrics)
+
+Client-side latency breakdown for successful asynchronous jobs. The timings are displayed in milliseconds and included in aggregate and per-request exports.
+
+| Metric | Interval |
+| --- | --- |
+| `video_job_submit_latency` | Request start to submit acknowledgement |
+| `video_job_poll_wait` | Submit acknowledgement to observed completed status |
+| `video_content_download_latency` | Observed completion to successful content download, only with `--download-video-content` |
+| `video_job_e2e_latency` | Request start to observed completion or, when enabled, successful download |
+
+Poll wait includes queue time, generation, polling cadence and network overhead;
+it does not measure GPU inference time. Existing `request_latency` retains its
+last-response semantics and ends at observed completion, even when downloading
+content. Failed jobs have no successful lifecycle metrics, and the download
+metric is absent, not zero, when downloading is disabled.
+
+---
 
 ### Video Inference Time
 

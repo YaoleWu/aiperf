@@ -208,7 +208,12 @@ Control video generation through `--extra-inputs`:
 
 **Video Download Option:**
 
-Use `--download-video-content` to include video content download in the benchmark timing. When enabled, request latency includes the time to download the generated video from the server. By default, only generation time is measured.
+Use `--download-video-content` to measure downloading the generated video from the server. Read `video_job_e2e_latency` for end-to-end time and `video_content_download_latency` for the download contribution. Without this flag, end-to-end time ends when AIPerf observes the completed job status.
+
+`video_job_submit_latency` and `video_job_poll_wait` separate the submit and
+status-polling phases. `request_latency` retains its last-response semantics,
+and `video_inference_time` is the server-reported generation time when available.
+See [Video Job Lifecycle](../metrics-reference.md#video-job-lifecycle).
 
 ```bash
 aiperf profile \

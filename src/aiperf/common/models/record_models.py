@@ -1268,6 +1268,11 @@ class RequestRecord(AIPerfBaseModel):
         ge=0,
         description="Exact successful HTTP response-body EOF in the worker's perf_counter_ns domain. Captured separately from the last response event in finite replay.",
     )
+    video_download_end_perf_ns: int | None = Field(
+        default=None,
+        ge=0,
+        description="Time the optional video content download succeeded in the worker's perf_counter_ns domain. Unset when no download was requested or it failed.",
+    )
     recv_start_perf_ns: int | None = Field(
         default=None,
         description="The start time of the streaming response in nanoseconds (perf_counter_ns).",

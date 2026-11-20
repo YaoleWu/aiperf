@@ -6,10 +6,15 @@ import pytest
 from aiperf.common.enums import MetricFlags, MetricSizeUnit, MetricTimeUnit
 from aiperf.common.exceptions import NoMetricValue
 from aiperf.common.models import ParsedResponse, ParsedResponseRecord
+from aiperf.common.models.error_models import ErrorDetails
 from aiperf.common.models.record_models import TextResponseData, VideoResponseData
 from aiperf.metrics.metric_dicts import MetricRecordDict
 from aiperf.metrics.types.video_generation_metrics import (
+    VideoContentDownloadLatencyMetric,
     VideoInferenceTimeMetric,
+    VideoJobE2ELatencyMetric,
+    VideoJobPollWaitMetric,
+    VideoJobSubmitLatencyMetric,
     VideoPeakMemoryMetric,
 )
 from tests.unit.metrics.conftest import create_record
@@ -38,6 +43,49 @@ def create_video_record(
     ]
 
     return record
+
+
+@pytest.mark.parametrize("download_end_ns", [None, 450])
+def test_video_lifecycle_metrics(download_end_ns: int | None) -> None:
+    """Download-inclusive E2E must not change the submit or poll boundaries."""
+    record = create_record(start_ns=100, responses=[150, 350])
+    record.responses = [
+        ParsedResponse(perf_ns=150, data=VideoResponseData(status="queued")),
+        ParsedResponse(perf_ns=350, data=VideoResponseData(status="completed")),
+    ]
+    record.request.end_perf_ns = download_end_ns or 350
+    record.request.video_download_end_perf_ns = download_end_ns
+    metrics = MetricRecordDict()
+    assert VideoJobSubmitLatencyMetric().parse_record(record, metrics) == 50
+    assert VideoJobPollWaitMetric().parse_record(record, metrics) == 200
+    assert VideoJobE2ELatencyMetric().parse_record(record, metrics) == (
+        350 if download_end_ns else 250
+    )
+    if download_end_ns is None:
+        with pytest.raises(NoMetricValue):
+            VideoContentDownloadLatencyMetric().parse_record(record, metrics)
+    else:
+        assert VideoContentDownloadLatencyMetric().parse_record(record, metrics) == 100
+
+
+def test_video_lifecycle_metrics_require_successful_job() -> None:
+    record = create_record(
+        start_ns=100,
+        responses=[150, 350],
+        error=ErrorDetails(type="VideoDownloadError", message="download failed"),
+    )
+    record.responses = [
+        ParsedResponse(perf_ns=150, data=VideoResponseData(status="queued")),
+        ParsedResponse(perf_ns=350, data=VideoResponseData(status="completed")),
+    ]
+    for metric in (
+        VideoJobSubmitLatencyMetric(),
+        VideoJobPollWaitMetric(),
+        VideoContentDownloadLatencyMetric(),
+        VideoJobE2ELatencyMetric(),
+    ):
+        with pytest.raises(NoMetricValue):
+            metric.parse_record(record, MetricRecordDict())
 
 
 class TestVideoInferenceTimeMetric:

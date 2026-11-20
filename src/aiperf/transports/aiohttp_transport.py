@@ -895,6 +895,7 @@ class AioHttpTransport(BaseTransport):
         start_ns = time.perf_counter_ns()
         headers = self.build_headers(request_info)
         responses: list[TextResponse | BinaryResponse] = []
+        download_end_ns: int | None = None
 
         def make_record(
             error: ErrorDetails | None = None, status: int | None = None
@@ -907,6 +908,7 @@ class AioHttpTransport(BaseTransport):
                 responses=responses,
                 error=error,
                 status=status,
+                video_download_end_perf_ns=download_end_ns,
             )
 
         # Use build_url to respect custom endpoints and plugin metadata
@@ -958,6 +960,7 @@ class AioHttpTransport(BaseTransport):
                 )
                 if isinstance(download_result, ErrorDetails):
                     return make_record(error=download_result)
+                download_end_ns = time.perf_counter_ns()
                 # Video bytes downloaded successfully (not added to responses - too large)
 
             return make_record(status=200)
